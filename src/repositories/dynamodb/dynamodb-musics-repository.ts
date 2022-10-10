@@ -1,29 +1,35 @@
-import { MusicsRepositoryInterface } from '../musics-repository'
-import { Database } from './database'
-import { BatchExecuteStatementCommand } from '@aws-sdk/client-dynamodb'
+import { MusicsRepositoryInterface, CreateParamsInterface } from '../musics-repository'
+import { MusicEntity } from './entities/music-entity'
 
-class DynamoMusicsRepository extends Database implements MusicsRepositoryInterface {
-  public async find (): Promise<any> {
-    const command = new BatchExecuteStatementCommand({
-      Statements: [
-        {
-          Statement: 'SELECT * FROM Musics WHERE EXISTS(songTitle) AND EXISTS(artist)'
-          // Parameters: [
-          //   { S: 'Master Of Puppets' },
-          //   { S: 'Metallica' }
-          // ]
-        }
-      ]
+export class DynamoMusicsRepository implements MusicsRepositoryInterface {
+  protected readonly TableName = 'Musics'
+  private readonly entiy: MusicEntity
+
+  constructor () {
+    this.entiy = new MusicEntity()
+  }
+
+  public async findAll (): Promise<any> {
+    const data = await this.entiy.findAll({
+      TableName: this.TableName
     })
-
-    const data = await this.client.send(command)
-      .then(({ Responses }) => Responses)
-      .catch(err => console.log(err))
 
     return data
   }
-}
 
-export {
-  DynamoMusicsRepository
+  public async create (item: CreateParamsInterface): Promise<any> {
+    const data = await this.entiy.create({
+      TableName: this.TableName,
+      Item: {
+        artist: {
+          S: item.artist
+        },
+        songTitle: {
+          S: item.songTitle
+        }
+      }
+    })
+
+    return data
+  }
 }

@@ -1,7 +1,9 @@
-interface MusicsRepositoryInterface {
-  find: () => Promise<any>
+export interface CreateParamsInterface {
+  artist: string
+  songTitle: string
 }
 
-export {
-  MusicsRepositoryInterface
+export interface MusicsRepositoryInterface {
+  findAll: () => Promise<any>
+  create: (items: CreateParamsInterface) => Promise<any>
 }
